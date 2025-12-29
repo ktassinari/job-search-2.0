@@ -1,0 +1,27 @@
+{
+  "name": "job-hunt-ai-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Local job search automation backend",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "scrape": "node src/scripts/scrape.js",
+    "score": "node src/scripts/score.js",
+    "generate": "node src/scripts/generate.js",
+    "schedule": "node src/scheduler.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "better-sqlite3": "^9.2.2",
+    "node-cron": "^3.0.3",
+    "cheerio": "^1.0.0-rc.12",
+    "axios": "^1.6.5",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

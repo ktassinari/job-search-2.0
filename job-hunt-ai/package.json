@@ -1,0 +1,34 @@
+{
+  "name": "job-hunt-ai",
+  "version": "1.0.0",
+  "description": "Local job search automation with AI-powered scoring and material generation",
+  "scripts": {
+    "install": "npm install --prefix backend && npm install --prefix frontend",
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "backend": "npm run dev --prefix backend",
+    "frontend": "npm run dev --prefix frontend",
+    "scrape": "npm run scrape --prefix backend",
+    "score": "npm run score --prefix backend",
+    "generate": "npm run generate --prefix backend",
+    "schedule": "npm run schedule --prefix backend",
+    "setup": "echo 'Installing dependencies...' && npm run install && echo '\n✅ Setup complete! See QUICKSTART.md for next steps.'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/job-hunt-ai"
+  },
+  "keywords": [
+    "job-search",
+    "automation",
+    "ai",
+    "llama",
+    "ollama",
+    "ux-design",
+    "themed-entertainment"
+  ],
+  "author": "Kat Tassinari",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -108,6 +108,16 @@ export function getJobsWithoutScore() {
   return db.prepare('SELECT * FROM jobs WHERE score = 0 OR score IS NULL').all();
 }
 
+export function getJobsToScore(limit = null) {
+  // Get jobs ordered by creation date (oldest first)
+  // This allows re-scoring of all jobs, not just unscored ones
+  let query = 'SELECT * FROM jobs ORDER BY created_at ASC';
+  if (limit) {
+    query += ` LIMIT ${limit}`;
+  }
+  return db.prepare(query).all();
+}
+
 export function getHighScoringJobsWithoutMaterials(minScore = 7) {
   return db.prepare(`
     SELECT j.* FROM jobs j

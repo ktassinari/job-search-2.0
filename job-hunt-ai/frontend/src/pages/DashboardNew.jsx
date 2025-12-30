@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAnalytics, getNewJobsCount, getFollowUps } from '../services/api';
+import { getAnalytics, getNewJobsCount, getFollowUps, scrapeJobs, scoreAllJobs, generateAllMaterials } from '../services/api';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Loading from '../components/Loading';
 import CompanyAvatar from '../components/CompanyAvatar';
 import {
   Sparkles, TrendingUp, Target, Send, Calendar, FileText, Briefcase,
-  ArrowRight, Eye, Clock, Download
+  ArrowRight, Eye, Clock, Download, Search, Star, FileCheck
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -16,6 +16,12 @@ export default function Dashboard() {
   const [newJobsCount, setNewJobsCount] = useState(0);
   const [followUps, setFollowUps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState({
+    scraping: false,
+    scoring: false,
+    generating: false
+  });
+  const [batchSize, setBatchSize] = useState(10);
 
   useEffect(() => {
     loadDashboardData();
@@ -36,6 +42,45 @@ export default function Dashboard() {
       console.error('Error loading dashboard:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleScrape() {
+    setActionLoading({ ...actionLoading, scraping: true });
+    try {
+      await scrapeJobs();
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error scraping jobs:', error);
+      alert('Failed to scrape jobs: ' + error.message);
+    } finally {
+      setActionLoading({ ...actionLoading, scraping: false });
+    }
+  }
+
+  async function handleScore() {
+    setActionLoading({ ...actionLoading, scoring: true });
+    try {
+      await scoreAllJobs(batchSize);
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error scoring jobs:', error);
+      alert('Failed to score jobs: ' + error.message);
+    } finally {
+      setActionLoading({ ...actionLoading, scoring: false });
+    }
+  }
+
+  async function handleGenerate() {
+    setActionLoading({ ...actionLoading, generating: true });
+    try {
+      await generateAllMaterials(7);
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error generating materials:', error);
+      alert('Failed to generate materials: ' + error.message);
+    } finally {
+      setActionLoading({ ...actionLoading, generating: false });
     }
   }
 
@@ -80,6 +125,49 @@ export default function Dashboard() {
             <Download className="w-4 h-4" />
             <span>Export Data</span>
           </button>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Button
+            onClick={handleScrape}
+            disabled={actionLoading.scraping}
+            className="bg-blue-500 hover:bg-blue-600 text-white border-0 flex items-center justify-center space-x-2 px-6 py-4"
+          >
+            <Search className="w-5 h-5" />
+            <span>{actionLoading.scraping ? 'Scraping...' : 'Scrape Jobs'}</span>
+          </Button>
+
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <input
+                type="number"
+                min="1"
+                max="100"
+                value={batchSize}
+                onChange={(e) => setBatchSize(parseInt(e.target.value) || 10)}
+                className="w-20 px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+              <Button
+                onClick={handleScore}
+                disabled={actionLoading.scoring}
+                className="flex-1 bg-purple-500 hover:bg-purple-600 text-white border-0 flex items-center justify-center space-x-2 px-6 py-2"
+              >
+                <Star className="w-5 h-5" />
+                <span>{actionLoading.scoring ? 'Scoring...' : 'Score Jobs'}</span>
+              </Button>
+            </div>
+            <p className="text-xs text-dark-text-secondary text-center">Score first {batchSize} jobs</p>
+          </div>
+
+          <Button
+            onClick={handleGenerate}
+            disabled={actionLoading.generating}
+            className="bg-green-500 hover:bg-green-600 text-white border-0 flex items-center justify-center space-x-2 px-6 py-4"
+          >
+            <FileCheck className="w-5 h-5" />
+            <span>{actionLoading.generating ? 'Generating...' : 'Generate Materials'}</span>
+          </Button>
         </div>
 
         {/* New Jobs Waiting Card */}

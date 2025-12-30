@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAnalytics, getNewJobsCount, getFollowUps } from '../services/api';
+import { getAnalytics, getNewJobsCount, getFollowUps, scrapeJobs, scoreAllJobs, generateAllMaterials } from '../services/api';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Loading from '../components/Loading';
-import { Sparkles, TrendingUp, Target, Send, Calendar, FileText, Briefcase, ArrowRight } from 'lucide-react';
+import { Sparkles, TrendingUp, Target, Send, Calendar, FileText, Briefcase, ArrowRight, Search, Star, FileCheck } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -12,6 +12,11 @@ export default function Dashboard() {
   const [newJobsCount, setNewJobsCount] = useState(0);
   const [followUps, setFollowUps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState({
+    scraping: false,
+    scoring: false,
+    generating: false
+  });
 
   useEffect(() => {
     loadDashboardData();
@@ -35,6 +40,45 @@ export default function Dashboard() {
     }
   }
 
+  async function handleScrape() {
+    setActionLoading({ ...actionLoading, scraping: true });
+    try {
+      await scrapeJobs();
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error scraping jobs:', error);
+      alert('Failed to scrape jobs: ' + error.message);
+    } finally {
+      setActionLoading({ ...actionLoading, scraping: false });
+    }
+  }
+
+  async function handleScore() {
+    setActionLoading({ ...actionLoading, scoring: true });
+    try {
+      await scoreAllJobs();
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error scoring jobs:', error);
+      alert('Failed to score jobs: ' + error.message);
+    } finally {
+      setActionLoading({ ...actionLoading, scoring: false });
+    }
+  }
+
+  async function handleGenerate() {
+    setActionLoading({ ...actionLoading, generating: true });
+    try {
+      await generateAllMaterials(7);
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error generating materials:', error);
+      alert('Failed to generate materials: ' + error.message);
+    } finally {
+      setActionLoading({ ...actionLoading, generating: false });
+    }
+  }
+
   if (loading) {
     return <Loading message="Loading dashboard..." />;
   }
@@ -47,6 +91,8 @@ export default function Dashboard() {
     interviews: 50
   };
 
+  console.log('Dashboard rendering, actionLoading:', actionLoading);
+
   return (
     <div className="min-h-screen bg-dark-bg">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
@@ -58,6 +104,36 @@ export default function Dashboard() {
           <p className="text-xl text-dark-text-secondary">
             You have {newJobsCount} high-scoring jobs waiting for review.
           </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4" style={{border: '2px solid red', padding: '20px'}}>
+          <Button
+            onClick={handleScrape}
+            disabled={actionLoading.scraping}
+            className="bg-blue-500 hover:bg-blue-600 text-white border-0 flex items-center justify-center space-x-2 px-6 py-4"
+          >
+            <Search className="w-5 h-5" />
+            <span>{actionLoading.scraping ? 'Scraping...' : 'Scrape Jobs'}</span>
+          </Button>
+
+          <Button
+            onClick={handleScore}
+            disabled={actionLoading.scoring}
+            className="bg-purple-500 hover:bg-purple-600 text-white border-0 flex items-center justify-center space-x-2 px-6 py-4"
+          >
+            <Star className="w-5 h-5" />
+            <span>{actionLoading.scoring ? 'Scoring...' : 'Score Jobs'}</span>
+          </Button>
+
+          <Button
+            onClick={handleGenerate}
+            disabled={actionLoading.generating}
+            className="bg-green-500 hover:bg-green-600 text-white border-0 flex items-center justify-center space-x-2 px-6 py-4"
+          >
+            <FileCheck className="w-5 h-5" />
+            <span>{actionLoading.generating ? 'Generating...' : 'Generate Materials'}</span>
+          </Button>
         </div>
 
         {/* New Jobs Waiting Card */}

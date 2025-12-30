@@ -72,9 +72,10 @@ export async function scrapeJobs() {
   });
 }
 
-export async function scoreAllJobs() {
+export async function scoreAllJobs(batchSize = null) {
   return request('/scrape/score', {
     method: 'POST',
+    body: JSON.stringify({ batchSize }),
   });
 }
 

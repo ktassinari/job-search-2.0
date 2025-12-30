@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getProfile, getSettings } from '../db/services.js';
 
 const OLLAMA_API = 'http://localhost:11434/api/generate';
-const MODEL = 'llama3.2:3b';
+const MODEL = 'deepseek-r1:8b'; // Using faster model
 
 /**
  * Call Ollama's Llama 3.2 model with a prompt
@@ -18,7 +18,7 @@ async function callLlama(prompt, temperature = 0.7) {
         num_predict: 1000
       }
     }, {
-      timeout: 60000 // 60 second timeout
+      timeout: 120000 // 120 second timeout (2 minutes)
     });
 
     return response.data.response;

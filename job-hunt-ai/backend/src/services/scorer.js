@@ -1,27 +1,28 @@
 import { scoreJob } from './llama.js';
-import { getJobsWithoutScore, updateJob } from '../db/services.js';
+import { getJobsWithoutScore, getJobsToScore, updateJob } from '../db/services.js';
 
 /**
  * Score all unscored jobs in the database
  */
-export async function scoreAllUnscoredJobs() {
+export async function scoreAllUnscoredJobs(batchSize = null) {
   console.log('🎯 Starting job scoring...');
 
-  const jobs = getJobsWithoutScore();
+  const jobs = batchSize ? getJobsToScore(batchSize) : getJobsWithoutScore();
 
   if (jobs.length === 0) {
     console.log('✅ No jobs to score');
     return { scored: 0, errors: 0 };
   }
 
-  console.log(`   Found ${jobs.length} jobs to score`);
+  console.log(`   Found ${jobs.length} jobs to score${batchSize ? ` (batch size: ${batchSize})` : ''}`);
 
   let scored = 0;
   let errors = 0;
 
-  for (const job of jobs) {
+  for (let i = 0; i < jobs.length; i++) {
+    const job = jobs[i];
     try {
-      console.log(`   Scoring: ${job.title} at ${job.company}...`);
+      console.log(`   [${i + 1}/${jobs.length}] Scoring: ${job.title} at ${job.company}...`);
 
       const result = await scoreJob(job);
 
@@ -32,12 +33,12 @@ export async function scoreAllUnscoredJobs() {
       });
 
       scored++;
-      console.log(`   ✓ Score: ${result.score}/10 - ${result.reason}`);
+      console.log(`   ✓ [${i + 1}/${jobs.length}] Score: ${result.score}/10 - ${result.reason}`);
 
       // Small delay to avoid overwhelming Ollama
       await new Promise(resolve => setTimeout(resolve, 500));
     } catch (error) {
-      console.error(`   ✗ Error scoring job ${job.id}:`, error.message);
+      console.error(`   ✗ [${i + 1}/${jobs.length}] Error scoring job ${job.id}:`, error.message);
       errors++;
     }
   }

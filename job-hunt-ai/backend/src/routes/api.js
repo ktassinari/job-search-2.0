@@ -27,10 +27,11 @@ router.post('/scrape', async (req, res) => {
   }
 });
 
-// POST /api/scrape/score - Score all unscored jobs
+// POST /api/scrape/score - Score jobs (with optional batch size)
 router.post('/scrape/score', async (req, res) => {
   try {
-    const result = await scoreAllUnscoredJobs();
+    const { batchSize } = req.body;
+    const result = await scoreAllUnscoredJobs(batchSize);
 
     res.json({
       success: true,

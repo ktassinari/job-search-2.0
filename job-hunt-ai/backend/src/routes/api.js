@@ -89,6 +89,47 @@ router.get('/materials/job/:jobId', (req, res) => {
   }
 });
 
+// POST /api/materials/job/:jobId/regenerate - Regenerate materials for a job
+router.post('/materials/job/:jobId/regenerate', async (req, res) => {
+  try {
+    const jobId = parseInt(req.params.jobId);
+    const job = dbService.getJobById(jobId);
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        error: 'Job not found'
+      });
+    }
+
+    // Delete existing materials
+    const existingMaterials = dbService.getMaterialsByJobId(jobId);
+    for (const material of existingMaterials) {
+      dbService.deleteMaterial(material.id);
+    }
+
+    // Generate new materials in background
+    const { generateMaterialsForJob } = await import('../services/generator.js');
+    generateMaterialsForJob(job)
+      .then(() => {
+        console.log(`✅ Materials regenerated for job ${jobId}`);
+      })
+      .catch(err => {
+        console.error(`❌ Error regenerating materials for job ${jobId}:`, err.message);
+      });
+
+    res.json({
+      success: true,
+      message: 'Materials regeneration started'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // ============ APPLICATIONS ENDPOINTS ============
 
 // GET /api/applications - Get all applications

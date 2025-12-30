@@ -18,7 +18,7 @@ async function callLlama(prompt, temperature = 0.7) {
         num_predict: 1000
       }
     }, {
-      timeout: 60000 // 60 second timeout
+      timeout: 180000 // 180 second timeout (3 minutes for materials generation)
     });
 
     return response.data.response;
@@ -132,34 +132,33 @@ Return ONLY valid JSON, no other text:
  * Generate tailored resume and cover letter using Llama 3.2
  */
 export async function generateMaterials(job) {
+  const profile = getProfile() || {};
+
+  // Build candidate information from database profile
+  const fullName = profile.full_name || 'Candidate';
+  const email = profile.email || '';
+  const phone = profile.phone || '';
+  const location = profile.location || '';
+  const graduationDate = profile.graduation_date || '';
+  const education = profile.education || '';
+  const skills = profile.skills || '';
+  const experience = profile.experience || '';
+  const summary = profile.summary || '';
+
   const prompt = `Create tailored resume and cover letter for this job application.
 
 CANDIDATE:
-Kat Tassinari | Kissimmee, FL | kat.tassinari@scad.edu
-SCAD BFA UX Design + Themed Entertainment Minor (Graduating June 2026)
+${fullName}${location ? ' | ' + location : ''}${email ? ' | ' + email : ''}${phone ? ' | ' + phone : ''}
+${education}${graduationDate ? ' (Graduation: ' + graduationDate + ')' : ''}
+
+ABOUT CANDIDATE:
+${summary}
 
 SKILLS:
-- UX Research & Design: User interviews, wireframing, prototyping, usability testing
-- Design Tools: Figma, Adobe Creative Suite, Sketch
-- 3D Design: Cinema 4D, Blender
-- Project Management: Agile, cross-functional collaboration
-- Themed Entertainment: Environmental design, narrative design, guest experience
+${skills}
 
-KEY PROJECTS:
-1. Snow: The Fairest (Red Dot Award Winner)
-   - HHN-style haunted house experience
-   - Environmental storytelling through UX design
-   - Mentored by Bob Weis (Former Disney Imagineer)
-
-2. Circe's Menagerie
-   - Greek mythology themed nightclub
-   - Immersive environmental design
-   - Interactive guest experiences
-
-3. MagicBand+ Sensory-Friendly Experience
-   - Inclusive design for theme park guests
-   - Accessibility-focused UX research
-   - Disney park technology integration
+EXPERIENCE:
+${experience}
 
 JOB POSTING:
 Title: ${job.title}
@@ -167,7 +166,7 @@ Company: ${job.company}
 Description: ${job.description ? job.description.substring(0, 1500) : 'No description'}
 
 Create professional, tailored application materials that:
-1. Highlight relevant skills and projects
+1. Highlight relevant skills and experience from the candidate's profile
 2. Show genuine enthusiasm for the role
 3. Demonstrate fit with company culture
 4. Keep resume to 1 page worth of content
@@ -177,7 +176,7 @@ Return ONLY valid JSON, no other text:
 {
   "resume": "<full resume text, organized with clear sections>",
   "coverLetter": "<full cover letter text, 3-4 paragraphs>",
-  "projects": "<comma-separated list of 2-3 most relevant projects>"
+  "projects": "<comma-separated list of 2-3 most relevant projects from experience>"
 }`;
 
   try {
@@ -187,7 +186,7 @@ Return ONLY valid JSON, no other text:
     return {
       resume: result.resume || 'Could not generate resume',
       coverLetter: result.coverLetter || 'Could not generate cover letter',
-      projects: result.projects || 'Snow: The Fairest, Circe\'s Menagerie'
+      projects: result.projects || ''
     };
   } catch (error) {
     console.error('Error generating materials:', error.message);

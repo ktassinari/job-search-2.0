@@ -8,7 +8,14 @@
       "Bash(sqlite3:*)",
       "Bash(curl:*)",
       "Bash(python3:*)",
-      "Bash(npm run score:*)"
+      "Bash(npm run score:*)",
+      "Bash(ls:*)",
+      "Bash(npm run dev:backend:*)",
+      "Bash(while read job_id)",
+      "Bash(do:*)",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(node:*)"
     ]
   }
 }

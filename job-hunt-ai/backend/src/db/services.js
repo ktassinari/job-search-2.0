@@ -282,11 +282,11 @@ export function getNewJobsCount(since = null) {
 export function getProfile() {
   const profile = db.prepare('SELECT * FROM profile WHERE id = 1').get();
 
-  // Create default profile if none exists
+  // Create empty default profile if none exists
   if (!profile) {
     db.prepare(`
       INSERT INTO profile (id, full_name, email, location)
-      VALUES (1, 'Kat Tassinari', 'kat@example.com', 'Kissimmee/Orlando, FL')
+      VALUES (1, 'User', 'email@example.com', 'Location')
     `).run();
     return db.prepare('SELECT * FROM profile WHERE id = 1').get();
   }

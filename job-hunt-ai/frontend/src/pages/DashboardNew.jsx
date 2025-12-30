@@ -46,7 +46,7 @@ export default function Dashboard() {
   }
 
   async function handleScrape() {
-    setActionLoading({ ...actionLoading, scraping: true });
+    setActionLoading(prev => ({ ...prev, scraping: true }));
     try {
       await scrapeJobs();
       await loadDashboardData();
@@ -54,25 +54,27 @@ export default function Dashboard() {
       console.error('Error scraping jobs:', error);
       alert('Failed to scrape jobs: ' + error.message);
     } finally {
-      setActionLoading({ ...actionLoading, scraping: false });
+      setActionLoading(prev => ({ ...prev, scraping: false }));
     }
   }
 
   async function handleScore() {
-    setActionLoading({ ...actionLoading, scoring: true });
+    setActionLoading(prev => ({ ...prev, scoring: true }));
     try {
-      await scoreAllJobs(batchSize);
+      const result = await scoreAllJobs(batchSize);
+      console.log('Scoring result:', result);
       await loadDashboardData();
+      alert(`Successfully scored ${result.data.scored} jobs!`);
     } catch (error) {
       console.error('Error scoring jobs:', error);
       alert('Failed to score jobs: ' + error.message);
     } finally {
-      setActionLoading({ ...actionLoading, scoring: false });
+      setActionLoading(prev => ({ ...prev, scoring: false }));
     }
   }
 
   async function handleGenerate() {
-    setActionLoading({ ...actionLoading, generating: true });
+    setActionLoading(prev => ({ ...prev, generating: true }));
     try {
       await generateAllMaterials(7);
       await loadDashboardData();
@@ -80,7 +82,7 @@ export default function Dashboard() {
       console.error('Error generating materials:', error);
       alert('Failed to generate materials: ' + error.message);
     } finally {
-      setActionLoading({ ...actionLoading, generating: false });
+      setActionLoading(prev => ({ ...prev, generating: false }));
     }
   }
 

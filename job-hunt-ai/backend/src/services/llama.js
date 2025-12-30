@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getProfile, getSettings } from '../db/services.js';
 
 const OLLAMA_API = 'http://localhost:11434/api/generate';
-const MODEL = 'deepseek-r1:8b'; // Using faster model
+const MODEL = 'llama3.2:3b'; // Smaller, faster model
 
 /**
  * Call Ollama's Llama 3.2 model with a prompt
